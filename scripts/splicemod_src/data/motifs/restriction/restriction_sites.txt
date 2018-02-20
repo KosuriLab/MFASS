@@ -1,0 +1,10 @@
+>ApaI
+GGGCCC
+>NheI
+GCTAGC
+>BspQI
+GCTCTTC
+>BspQI
+GAAGAGC
+
+
