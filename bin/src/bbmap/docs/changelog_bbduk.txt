@@ -1,0 +1,77 @@
+BBDuk readme by Brian Bushnell
+Last updated February 18, 2014.
+Please contact me at bbushnell@lbl.gov if you have any questions or encounter any errors.
+
+Verison 9:
+All program message information now defaults to stderr.
+
+Version 8:
+Fixed bug in which the program would exit immediately if the first batch of reads were all discarded.  Found by Bryce Foster.
+
+Version 7:
+hdist>0 or edist>0 stopped working because the leading '1' bit was not appended when searching; fixed.
+Added assertions requiring a ktrim mode if useShortKmers is enabled.
+Added message notifying when maskMiddle is disabled due to useShortKmers or kbig.
+
+Version 6:
+Made .txt extension for files default to specified default format, rather than bread.  Bug noted by James Han.
+TrimRead.testOptimal() mode added, and made default when quality trimming is performed; old mode can be used with 'otf=f' flag.
+
+Version 5:
+Found and fixed some bugs with mink<k.  Several things were not working properly due to kmask/kmasks[] not being used correctly.
+Made "removeifeitherbad" flag a parameter (rieb).
+Added shellscript support for java -Xmx flag (Suggested by James Han).
+Fixed bug in which literals were ignored if there were no reference files.  Noted by Bryce Foster.
+Added scarf support.
+
+Version 4:
+Fixed bug in which kmers of length k-1 were occasionally used (with an A in the empty slot).
+Added pigz (parallel gzip) support, at suggestion of Rob Egan.
+Modified slightly to support "rqc" flag for additional statistcs output in conjunction with RQCFilter.
+Files such as primes.txt.gz can now be located in /resources/ (same level as /current/ and /docs/) and may be loaded from a jar file.
+Increased default pigz threads to max of 8 (up to 1/2 of available processors).
+Fixed bug with hdist/edist: Kmers shorter than normal 'k' were not being generated properly (e.g. if mink<k and hdist>0).
+
+
+Version 3:
+Added "VERSION" field and set it to 3.
+Changed default otm to true (output trimmed reads shorter than minlength).
+Added comments and reorganized code.
+Added "maxns" flag; enables discarding of reads with more Ns (or any non-ACGT symbol) than the limit.
+Added mode switch for discarding paired reads.  You can send them if BOTH are bad or if EITHER is bad (default is either).  
+Added support for discarding reads that are bad for different reasons; e.g. read1 has low average quality and read2 is too short.
+
+
+Version 2:
+Created BBDukF with a custom data structure, "HashForest".  This reduces memory consumption by around 40% (~38B/kmer).  Indexing speed is similar; processing speed ranges from the same to around 50% slower.  So overall it is generally slower but still very fast.  Output should be identical.
+Created single-linked KmerTable for comparison.  Similar overall to Hashforest.
+Created HashArray with kmers in long[], counts in int[], and a HashForest victim cache.  Achieves 15B/kmer (tested)!  Faster than HashForest in running and loading.
+Added kmer trimming (rather than throwing away reads). (suggested by James Han, Shoudan Liang)
+Added end-trimming using shorter kmers (suggested by James Han).
+Added multiple parameters and revised shellscript help.
+TODO:  Consider changing HashArray kmers to int[].
+Added emulation for kmers larger than 31.  If you set k>31, a "match" will mean (1+k-31) consecutive matches of length-31 kmers.  This mode will automatically set the max skip to 1, which will use more memory for large genomes (human would require around 60G in this mode, which will fail with the default -Xmx parameter).
+TODO:  Define -Xmn for shellscripts and test speed/memory effects.  32m should be enough.
+Fixed bug in BBDuk/BBDukF in which ktrim mode incorrectly assumed maskmiddle=f.  Noted by Shoudan Liang and James Han.
+Revised trim quality flag.  It is now correctly called "trimq" everywhere.
+Added support for calling output streams "outm" and "outu" for outmatch and outunmatch.
+Disabled "maskmiddle" when kbig>k (or mink<k).
+Added "otm", "outputtrimmedtomatch".  Default is currently "false".  Requested by Govind Ramamoorthy.
+TODO:  Currently, both qtrimmed and ktrimmed reads are affected by "otm" flag.
+TODO:  Support true kmers of arbitrary length.
+Fixed trim mode bug: "trim=both" was only trimming the right side.
+Added option to look for only forward kmers rather than forward and reverse kmers.  Requested by Shoudan Liang.
+Added option to replace matching bases with an arbitrary symbol rather than just 'N'.  Requested by Shoudan Liang.
+Added option to skip first X input reads.  Requested by Shoudan Liang.
+Added kmer matching for kmers with Ns in them (only if hdist>0 or edist>0).  Should increase accuracy on low-quality reads.  This is enabled by default but can be disabled with the 'forbidn' or 'fn' flag.  Note that when enabled, a read's kmer 'NNN...NNN' will match to a reference kmer 'AAA...AAA' (and any N in a read can match an A in the ref), which may not be desirable.
+
+
+
+Version 1:
+Multithreaded table loading; increased speed by up to 5x.
+Added Hamming distance support (suggested by James Han).
+Added edit distance support (suggested by James Han).
+Doubled speed when most reads match reference, and no hitcount histogram is needed, by adding an early exit to test loop.
+Now defaults to ByteFile2 which increases fastq input speed when there are at least 3 CPU cores.
+Added maxskip (mxs) and minskip (mns) flags to control reference kmer skipping when making index.
+TODO:  Track consecutive hits to emulate support for kmers>31.
