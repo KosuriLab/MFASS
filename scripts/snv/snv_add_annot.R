@@ -157,7 +157,7 @@ data %>%
                 sep='\t', quote = F, row.names = F, col.names = F)
 
 # this takes awhile
-# system(paste('../ensembl-vep/vep -i ../../ref/snv/snv.vcf',
+# system(paste('../../bin/ensembl-vep/vep -i ../../ref/snv/snv.vcf',
 #              '--cache --dir_cache ../../ref/vep/'))
 # system('mv variant_effect_output.txt ../../processed_data/snv/snv_vep.txt')
 # system('rm -f variant_effect_output.txt_summary.html')

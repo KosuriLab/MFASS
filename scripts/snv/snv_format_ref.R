@@ -172,14 +172,14 @@ write.table(ref, '../../ref/snv/snv_ref_formatted_converted.txt', sep = '\t',
 ref <- read.table('../../ref/snv/snv_ref_formatted_converted.txt', 
                   sep = '\t', header = T)
 snv_ref_original_seq <- read.table('../../ref/snv/snv_ref_original_seq.txt',
-                                    sep = '\t', header = T) %>% 
-  select(id, original_seq = sequence)
+                                   sep = '\t', header = T) %>% 
+    select(id, original_seq = sequence)
 
 ref <- ref %>%
-  left_join(snv_ref_original_seq, by = 'id') %>%
-  mutate(original_seq = ifelse(is.na(original_seq), sequence, original_seq),
-         mixed_seq = sequence) %>%
-  arrange(id, sub_id)
+    left_join(snv_ref_original_seq, by = 'id') %>%
+    mutate(original_seq = ifelse(is.na(original_seq), sequence, original_seq),
+           mixed_seq = sequence) %>%
+    arrange(id, sub_id)
 
 # make column for natural sequence
 ref <- ref %>% 

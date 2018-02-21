@@ -36,9 +36,9 @@ bin_prop <- c(0.092, 0.091, 0.127, 0.122, 1, 1, 0.596, 0.603)
 
 # multiply each bin count by bin proportion
 snv_v1 <- bind_cols(select(snv_v1, header = id, DP_R1:SP_R2), 
-                     data.frame(mapply(`*`, 
-                                    select(snv_v1, DP_R1_norm:SP_R2_norm), 
-                                    bin_prop, SIMPLIFY = FALSE)))
+                    data.frame(mapply(`*`, 
+                                      select(snv_v1, DP_R1_norm:SP_R2_norm), 
+                                      bin_prop, SIMPLIFY = FALSE)))
 
 
 # SNV second sequencing run (v2), four bins
@@ -53,9 +53,9 @@ bin_prop <- c(0.070, 0.075, 0.029, 0.032, 0.032, 0.033, 0.227, 0.252)
 
 # multiply each bin count by bin proportion
 snv_v2 <- bind_cols(select(snv_v2, header = id, Hi.R1:Lo.R2), 
-                     data.frame(mapply(`*`, 
-                                    select(snv_v2, Hi.R1_norm:Lo.R2_norm), 
-                                    bin_prop, SIMPLIFY = FALSE)))
+                    data.frame(mapply(`*`, 
+                                      select(snv_v2, Hi.R1_norm:Lo.R2_norm), 
+                                      bin_prop, SIMPLIFY = FALSE)))
 
 ###############################################################################
 # Filtering
@@ -82,9 +82,9 @@ print(paste("Number of sequences after read filter (v1, v2):",
 snv_v1 <- snv_v1 %>% 
     # calculate index
     mutate(v1_index_R1 = (DP_R1_norm * 0 + INT_R1_norm * 0.85 + 
-               SP_R1_norm * 1) / (DP_R1_norm + INT_R1_norm + SP_R1_norm),
+                              SP_R1_norm * 1) / (DP_R1_norm + INT_R1_norm + SP_R1_norm),
            v1_index_R2 = (DP_R2_norm * 0 + INT_R2_norm * 0.85 + 
-               SP_R2_norm * 1) / (DP_R2_norm + INT_R2_norm + SP_R2_norm),
+                              SP_R2_norm * 1) / (DP_R2_norm + INT_R2_norm + SP_R2_norm),
            v1_R1_norm = DP_R1_norm + INT_R1_norm + SP_R1_norm,
            v1_R2_norm = DP_R2_norm + INT_R2_norm + SP_R2_norm,
            v1_norm = v1_R1_norm + v1_R2_norm) %>%
@@ -93,23 +93,23 @@ snv_v1 <- snv_v1 %>%
 
 # index agreement
 snv_v2 <- snv_v2 %>% 
-     mutate(v2_index_R1 = (Hi.R1_norm * 0 + IntHi.R1_norm * 0.80 + 
-                             IntLo.R1_norm * 0.95 + Lo.R1_norm * 1) / 
-                (Hi.R1_norm + IntHi.R1_norm + IntLo.R1_norm + Lo.R1_norm), 
-            v2_index_R2 = (Hi.R2_norm * 0 + IntHi.R2_norm * 0.80 + 
-                             IntLo.R2_norm * 0.95 + Lo.R2_norm * 1) / 
+    mutate(v2_index_R1 = (Hi.R1_norm * 0 + IntHi.R1_norm * 0.80 + 
+                              IntLo.R1_norm * 0.95 + Lo.R1_norm * 1) / 
+               (Hi.R1_norm + IntHi.R1_norm + IntLo.R1_norm + Lo.R1_norm), 
+           v2_index_R2 = (Hi.R2_norm * 0 + IntHi.R2_norm * 0.80 + 
+                              IntLo.R2_norm * 0.95 + Lo.R2_norm * 1) / 
                (Hi.R2_norm + IntHi.R2_norm + IntLo.R2_norm + Lo.R2_norm),
-            v2_R1_norm = Hi.R1_norm + 
-                 IntHi.R1_norm + IntLo.R1_norm + Lo.R1_norm,
-            v2_R2_norm = Hi.R2_norm + 
-                 IntHi.R2_norm + IntLo.R2_norm + Lo.R2_norm,
-            v2_norm = v2_R1_norm + v2_R2_norm) 
+           v2_R1_norm = Hi.R1_norm + 
+               IntHi.R1_norm + IntLo.R1_norm + Lo.R1_norm,
+           v2_R2_norm = Hi.R2_norm + 
+               IntHi.R2_norm + IntLo.R2_norm + Lo.R2_norm,
+           v2_norm = v2_R1_norm + v2_R2_norm) 
 
 # correlation for v2 before index filter
 corr <- wtd.cor(snv_v2$v2_index_R1, snv_v2$v2_index_R2, snv_v2$v2_norm)
 gg <- snv_v2 %>%
     mutate(rep_quality = ifelse(abs(v2_index_R1 - v2_index_R2) <= 0.20, 
-                                  'high', 'low')) %>% 
+                                'high', 'low')) %>% 
     ggplot(aes(v2_index_R1, v2_index_R2)) + 
     geom_point(alpha = 0.25, aes(color = rep_quality)) +
     scale_color_manual(values = c('black', 'darkgrey')) +
@@ -118,18 +118,18 @@ gg <- snv_v2 %>%
     labs(x = 'inclusion index (v2 replicate 1)', 
          y = 'inclusion index (v2 replicate 2)') +
     theme(legend.position = 'none',
-        axis.title.x = element_text(size = 16, vjust = -2), 
-        axis.title.y = element_text(size = 16, vjust = +4),
-        axis.text.x = element_text(size = 14, color = 'grey20'),
-        axis.text.y = element_text(size = 14, color = 'grey20'),
-        axis.ticks.x = element_line(color = 'grey50'),
-        axis.ticks.y = element_line(color = 'grey50'),
-        axis.line.x = element_line(color = 'grey50'),
-        axis.line.y = element_line(color = 'grey50'),
-        plot.margin = unit(c(2,2,3,3),"mm")) +
-        annotate('text', x = 0.89, y = 0.10, parse = T,
+          axis.title.x = element_text(size = 16, vjust = -2), 
+          axis.title.y = element_text(size = 16, vjust = +4),
+          axis.text.x = element_text(size = 14, color = 'grey20'),
+          axis.text.y = element_text(size = 14, color = 'grey20'),
+          axis.ticks.x = element_line(color = 'grey50'),
+          axis.ticks.y = element_line(color = 'grey50'),
+          axis.line.x = element_line(color = 'grey50'),
+          axis.line.y = element_line(color = 'grey50'),
+          plot.margin = unit(c(2,2,3,3),"mm")) +
+    annotate('text', x = 0.89, y = 0.10, parse = T,
              label = paste('italic(r) ==', signif(corr[1], 2)), size = 5) +
-        annotate('text', x = 0.91, y = 0.05, parse = T,
+    annotate('text', x = 0.91, y = 0.05, parse = T,
              label = paste('italic(p) < 10^-16'), size = 5)
 
 ggsave(paste0('../../figs/supplement/snv_v2_replicates', plot_format), 
@@ -156,21 +156,21 @@ data_all$v2_index <- rowMeans(select(data_all, v2_index_R1, v2_index_R2))
 # correlation between v1 and v2
 corr <- wtd.cor(data_all$v1_index, data_all$v2_index, data_all$all_norm)
 gg <- ggplot(data_all, aes(v1_index, v2_index)) + geom_point(alpha = 0.25) +
-  scale_x_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
-  scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
-  labs(x = 'inclusion index (SNV library v1)', 
-       y = 'inclusion index (SNV library v2)') +
-  theme(legend.position = 'none',
-        axis.title.x = element_text(size = 16, vjust = -2), 
-        axis.title.y = element_text(size = 16, vjust = +4),
-        axis.text.x = element_text(size = 14, color = 'grey20'),
-        axis.text.y = element_text(size = 14, color = 'grey20'),
-        axis.ticks.x = element_line(color = 'grey50'),
-        axis.ticks.y = element_line(color = 'grey50'),
-        axis.line.x = element_line(color = 'grey50'),
-        axis.line.y = element_line(color = 'grey50'),
-        plot.margin = unit(c(2,2,3,3),"mm"))+
-  theme(legend.position = 'none') +
+    scale_x_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
+    scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
+    labs(x = 'inclusion index (SNV library v1)', 
+         y = 'inclusion index (SNV library v2)') +
+    theme(legend.position = 'none',
+          axis.title.x = element_text(size = 16, vjust = -2), 
+          axis.title.y = element_text(size = 16, vjust = +4),
+          axis.text.x = element_text(size = 14, color = 'grey20'),
+          axis.text.y = element_text(size = 14, color = 'grey20'),
+          axis.ticks.x = element_line(color = 'grey50'),
+          axis.ticks.y = element_line(color = 'grey50'),
+          axis.line.x = element_line(color = 'grey50'),
+          axis.line.y = element_line(color = 'grey50'),
+          plot.margin = unit(c(2,2,3,3),"mm"))+
+    theme(legend.position = 'none') +
     annotate('text', x = 0.95, y = 0.10, parse = T,
              label = paste0('italic(r)==', signif(corr[1], 2)), size = 5) +
     annotate('text', x = 0.96, y = 0.05, parse = T,
@@ -181,8 +181,8 @@ ggsave(paste0('../../figs/supplement/snv_v1_v2_replicates', plot_format),
 
 # read in updated ref
 ref <- read.table(paste0('../../ref/snv/',
-                    'snv_ref_formatted_converted_original_seq.txt'), 
-                     sep = '\t', header = T)
+                         'snv_ref_formatted_converted_original_seq.txt'), 
+                  sep = '\t', header = T)
 
 # combine with data
 data_all <- left_join(data_all, ref, by = 'id') %>% 
@@ -255,8 +255,8 @@ data_other <- data_all %>%
     filter(any(sub_id == 'SKP') | (any(ensembl_id == 'RANDOM-EXON')) ) %>%
     ungroup() %>% 
     mutate(category = 
-             case_when(.$sub_id == 'SKP' ~ 'skipped control',
-                       .$ensembl_id == 'RANDOM-EXON' ~ 'random nucleotides'))
+               case_when(.$sub_id == 'SKP' ~ 'skipped control',
+                         .$ensembl_id == 'RANDOM-EXON' ~ 'random nucleotides'))
 data_other <- bind_rows(data_other, filter(data, category == 'control'))
 
 # plot controls
@@ -283,6 +283,6 @@ gg <- data_other %>%
 
 ggsave(paste0('../../figs/supplement/snv_controls', plot_format), 
        gg, width = 4.5, height = 4)
-           
+
 write.table(data, '../../processed_data/snv/snv_data_clean.txt', 
             sep = '\t', row.names = F, quote = F)
