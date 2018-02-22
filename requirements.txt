@@ -1,0 +1,58 @@
+### BINARIES ###
+mkdir -p bin/
+# liftOver
+wget -P bin http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/liftOver
+chmod +x bin/liftOver
+
+# bigWigAverageOverBed
+wget -P bin http://hgdownload.cse.ucsc.edu/admin/exe/macOSX.x86_64/bigWigAverageOverBed
+
+# tabix, download from https://sourceforge.net/projects/samtools/files/tabix/tabix-0.2.6.tar.bz2/download to bin/src
+# cd bin/src
+# tar -xzvf tabix-0.2.6.tar.bz2
+# cd tabix-0.2.6
+# make 
+# mv tabix ../../
+
+# bedtools
+wget -P bin/src/ https://github.com/arq5x/bedtools2/releases/download/v2.25.0/bedtools-2.25.0.tar.gz
+cd bin/src
+tar -xzvf bedtools-2.25.0.tar.gz
+cd bedtools2
+make
+cp bin/* ../../
+
+## bbmerge from bbmap suite
+# download from https://downloads.sourceforge.net/project/bbmap/BBMap.tar.gz to bin/src
+cd bin/src
+mkdir bbmap
+tar -xzvf BBMap.tar.gz -C bbmap/
+mv bbmap/bbmerge.sh ../
+
+### SPLICEMOD PACKAGES ###
+# biopython version very important, uses deprecated Bio.Motifs package
+# biopython==1.57
+# numpy
+# pyinterval==1.0
+# bx-python
+# acora
+# blist
+# MySQL
+# cogent
+# sqlalchemy
+
+### REFERENCES ###
+# functional gene constraint, pLI
+wget -P ref/exac ftp://ftp.broadinstitute.org/pub/ExAC_release/release0.3.1/functional_gene_constraint/fordist_cleaned_exac_r03_march16_z_pli_rec_null_data.txt
+# LINSIGHT scores
+wget -P ref http://compgen.cshl.edu/fitCons/0downloads/tracks/i6/scores/fc-i6-0.bw
+# GENCODE annotation
+wget -P ref ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_26/gencode.v26.annotation.gtf.gz
+# CADD
+mkdir -p ref/cadd
+wget -P ref/cadd http://krishna.gs.washington.edu/download/CADD/v1.3/ExAC_r0.3.tsv.gz
+wget -P ref/cadd http://krishna.gs.washington.edu/download/CADD/v1.3/ExAC_r0.3.tsv.gz.tbi
+# DANN
+wget -P ref/exac https://cbcl.ics.uci.edu/public_data/DANN/data/DANN_whole_genome_SNVs.tsv.bgz
+wget -P ref/exac https://cbcl.ics.uci.edu/public_data/DANN/data/DANN_whole_genome_SNVs.tsv.bgz.tbi
+
