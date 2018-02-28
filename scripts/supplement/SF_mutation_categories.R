@@ -15,7 +15,7 @@ load_pkgs(pkgs)
 options(stringsAsFactors = F, warn = -1, warnings = -1)
 
 plot_format_main <- '.tiff'
-plot_format <- '.png'
+plot_format <- '.tiff'
 hi_res <- 600
 
 jitter_alpha <- 0.10
@@ -42,20 +42,20 @@ updated_ref <- read.csv('../../ref/sre/sre_ref_rescored.txt',
 data <- data %>% 
   left_join(dplyr::select(updated_ref, id, exon_seq:correct_don_score), by = 'id')
 
-# calculate change in donor/acceptor score between mutant and wild-type 
-data <- data %>% 
-  group_by(ensembl_id) %>% 
-  filter(any(sub_id == '000')) %>% 
-  mutate(correct_acc_score_nat = correct_acc_score[sub_id == '000'],
-         correct_don_score_nat = correct_don_score[sub_id == '000'],
-         delta_acc_score = correct_acc_score - correct_acc_score_nat,
-         delta_don_score = correct_don_score - correct_don_score_nat,
-         # calculate fold change in score relative to wild-type
-         don_score_fold_change = (correct_don_score - correct_don_score_nat) / 
-           abs(correct_don_score_nat),
-         acc_score_fold_change = (correct_acc_score - correct_acc_score_nat) / 
-           abs(correct_acc_score_nat)) %>%
-  ungroup()
+# # calculate change in donor/acceptor score between mutant and wild-type 
+# data <- data %>% 
+#   group_by(ensembl_id) %>% 
+#   filter(any(sub_id == '000')) %>% 
+#   mutate(correct_acc_score_nat = correct_acc_score[sub_id == '000'],
+#          correct_don_score_nat = correct_don_score[sub_id == '000'],
+#          delta_acc_score = correct_acc_score - correct_acc_score_nat,
+#          delta_don_score = correct_don_score - correct_don_score_nat,
+#          # calculate fold change in score relative to wild-type
+#          don_score_fold_change = (correct_don_score - correct_don_score_nat) / 
+#            abs(correct_don_score_nat),
+#          acc_score_fold_change = (correct_acc_score - correct_acc_score_nat) / 
+#            abs(correct_acc_score_nat)) %>%
+#   ungroup()
 
 ###############################################################################
 # sre categories

@@ -192,9 +192,11 @@ if __name__ == '__main__':
                           sep = '\t', header = None, names = ['seq', 'Ke_score'])
     Ke_motifs = pd.concat([ESE_motifs, ESS_motifs])
     Ke_score_dict = Ke_motifs.set_index('seq').T.to_dict('records')[0]
+    
     # # re-calculate exon sequence without extension
     # data['exon_seq'] = data.apply(lambda x : extract_exon_seq(x['strand'], 
     #     x['intron1_len'], x['exon_len'], x['intron2_len'], x['sequence'], extend=0, rc=args.rev), axis=1)
+    
     data['Ke2011_avg_score'] = data.apply(lambda x : score_exon(x['exon_seq'], Ke_score_dict, 6), axis=1)
 
     # Let's format our library into `SeqRecord` objects from `biopython` to make 

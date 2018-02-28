@@ -7,12 +7,12 @@ load_pkgs <- function(pkgs){
     }
 }
 
-pkgs <- c('dplyr', 'tidyr', 'ggplot2', 'cowplot', 'weights')
+pkgs <- c('dplyr', 'tidyr', 'ggplot2', 'cowplot', 'weights', 'wCorr')
 load_pkgs(pkgs)
 
 options(stringsAsFactors = F, warn = -1, warnings = -1)
 
-plot_format <- '.png'
+plot_format <- '.tiff'
 
 ###############################################################################
 # Read in data
@@ -106,17 +106,28 @@ snv_v2 <- snv_v2 %>%
            v2_norm = v2_R1_norm + v2_R2_norm) 
 
 # correlation for v2 before index filter
-corr <- wtd.cor(snv_v2$v2_index_R1, snv_v2$v2_index_R2, snv_v2$v2_norm)
+snv_v2 <- snv_v2 %>% 
+    mutate(v2_index_R1_binary = ifelse(v2_index_R1 >= 0.5, 1, 0),
+           v2_index_R2_binary = ifelse(v2_index_R2 >= 0.5, 1, 0))
+
+# tetrachoric correlation, 0.94
+weightedCorr(snv_v2$v2_index_R1_binary, 
+             snv_v2$v2_index_R2_binary, 
+             method = "polychoric", 
+             weights = snv_v2$v2_norm)
+
 gg <- snv_v2 %>%
     mutate(rep_quality = ifelse(abs(v2_index_R1 - v2_index_R2) <= 0.20, 
                                 'high', 'low')) %>% 
     ggplot(aes(v2_index_R1, v2_index_R2)) + 
-    geom_point(alpha = 0.25, aes(color = rep_quality)) +
+    geom_point(alpha = 0.10, aes(color = rep_quality)) +
     scale_color_manual(values = c('black', 'darkgrey')) +
     scale_x_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
     scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
-    labs(x = 'inclusion index (v2 replicate 1)', 
-         y = 'inclusion index (v2 replicate 2)') +
+    geom_abline(slope = 1, intercept = -0.20, linetype = 'dashed') +
+    geom_abline(slope = 1, intercept = 0.20, linetype = 'dashed') +
+    labs(x = 'inclusion index (v2 biological replicate 1)', 
+         y = 'inclusion index (v2 biological replicate 2)') +
     theme(legend.position = 'none',
           axis.title.x = element_text(size = 16, vjust = -2), 
           axis.title.y = element_text(size = 16, vjust = +4),
@@ -126,13 +137,11 @@ gg <- snv_v2 %>%
           axis.ticks.y = element_line(color = 'grey50'),
           axis.line.x = element_line(color = 'grey50'),
           axis.line.y = element_line(color = 'grey50'),
-          plot.margin = unit(c(2,2,3,3),"mm")) +
-    annotate('text', x = 0.89, y = 0.10, parse = T,
-             label = paste('italic(r) ==', signif(corr[1], 2)), size = 5) +
-    annotate('text', x = 0.91, y = 0.05, parse = T,
-             label = paste('italic(p) < 10^-16'), size = 5)
+          plot.margin = unit(c(2,2,3,3),"mm"))
+    # annotate('text', x = 0.10, y = 0.90, parse = T,
+    #          label = paste('italic(r) ==', signif(corr[1], 2)), size = 5)
 
-ggsave(paste0('../../figs/supplement/snv_v2_replicates', plot_format), 
+ggsave(paste0('../../figs/supplement/SF6A_snv_v2_replicates', plot_format), 
        gg, width = 6, height = 6)
 
 # rep agreement
@@ -153,9 +162,20 @@ data_all <- full_join(snv_v1, snv_v2, by = 'header') %>%
 data_all$v1_index <- rowMeans(select(data_all, v1_index_R1, v1_index_R2))
 data_all$v2_index <- rowMeans(select(data_all, v2_index_R1, v2_index_R2))
 
+# tetrachoric correlation, 0.99
+data_all <- data_all %>%
+    filter(!is.na(v1_index), !is.na(v2_index)) %>%
+    mutate(v1_index_binary = ifelse(v1_index >= 0.5, 1, 0),
+           v2_index_binary = ifelse(v2_index >= 0.5, 1, 0))
+
+weightedCorr(data_all$v1_index_binary, 
+             data_all$v2_index_binary, 
+             method = "polychoric", 
+             weights = data_all$all_norm)
+
 # correlation between v1 and v2
 corr <- wtd.cor(data_all$v1_index, data_all$v2_index, data_all$all_norm)
-gg <- ggplot(data_all, aes(v1_index, v2_index)) + geom_point(alpha = 0.25) +
+gg <- ggplot(data_all, aes(v1_index, v2_index)) + geom_point(alpha = 0.10) +
     scale_x_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
     scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
     labs(x = 'inclusion index (SNV library v1)', 
@@ -170,13 +190,13 @@ gg <- ggplot(data_all, aes(v1_index, v2_index)) + geom_point(alpha = 0.25) +
           axis.line.x = element_line(color = 'grey50'),
           axis.line.y = element_line(color = 'grey50'),
           plot.margin = unit(c(2,2,3,3),"mm"))+
-    theme(legend.position = 'none') +
-    annotate('text', x = 0.95, y = 0.10, parse = T,
-             label = paste0('italic(r)==', signif(corr[1], 2)), size = 5) +
-    annotate('text', x = 0.96, y = 0.05, parse = T,
-             label = paste('italic(p) < 10^-16'), size = 5)
+    theme(legend.position = 'none')
+    # annotate('text', x = 0.95, y = 0.10, parse = T,
+    #          label = paste0('italic(r)==', signif(corr[1], 2)), size = 5) +
+    # annotate('text', x = 0.96, y = 0.05, parse = T,
+    #          label = paste('italic(p) < 10^-16'), size = 5)
 
-ggsave(paste0('../../figs/supplement/snv_v1_v2_replicates', plot_format), 
+ggsave(paste0('../../figs/supplement/SF6B_snv_v1_v2_replicates', plot_format), 
        gg, width = 6, height = 6)
 
 # read in updated ref
@@ -281,7 +301,7 @@ gg <- data_other %>%
           axis.line.y = element_line(color = 'grey50'),
           plot.margin = unit(c(2,2,3,3),"mm"))
 
-ggsave(paste0('../../figs/supplement/snv_controls', plot_format), 
+ggsave(paste0('../../figs/supplement/SF7_snv_controls', plot_format), 
        gg, width = 4.5, height = 4)
 
 write.table(data, '../../processed_data/snv/snv_data_clean.txt', 
