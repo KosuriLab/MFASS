@@ -1,3 +1,10 @@
+bin/ensembl-vep
+processed_data/snv/nat_downstr_intron_cons_scores_all.bed
+processed_data/snv/nat_upstr_intron_cons_scores_all.bed
+processed_data/snv/nat_upstr_intron_positions.bed
+processed_data/snv/nat_exon_cons_scores_all.bed
+processed_data/snv/nat_exon_positions.bed
+processed_data/snv/nat_downstr_intron_positions.bed
 ref/Rosenberg_2015/model_full_data.mat
 ref/phyloP/chr15.phyloP100way.bigWig
 ref/phyloP/chr14.phyloP100way.bigWig
@@ -99,5 +106,6 @@ ref/vep/homo_sapiens/90_GRCh38/2/all_vars.gz
 ref/vep/homo_sapiens/90_GRCh38/13/all_vars.gz
 ref/vep/homo_sapiens/90_GRCh38/5/all_vars.gz
 ref/vep/homo_sapiens/90_GRCh38/14/all_vars.gz
+ref/snv/ExAC_SNVs.vcf.gz
 ref/snv/ExAC.r0.3.1.sites.vep.vcf.gz
 ref/snv/snp_snv_annot_all.txt
