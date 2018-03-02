@@ -12,6 +12,9 @@ run_HAL: ../../processed_data/snv/snv_HAL_scores.txt
 
 run_SPANR: ../../processed_data/snv/snv_SPANR_scores.txt
 
+fig2: ../../figs/snv/fig2C_snv_density.tiff
+
+
 Rscript = /Library/Frameworks/R.framework/Resources/Rscript
 
 
@@ -45,6 +48,11 @@ Rscript = /Library/Frameworks/R.framework/Resources/Rscript
 ../../processed_data/snv/snv_SPANR_scores.txt: ../../processed_data/snv/snv_data_clean.txt snv_run_SPANR.py
 	@ echo "Calculating SPANR scores..."
 	@ python snv_run_SPANR.py $< $@
+
+
+../../figs/snv/fig2C_snv_density.tiff: ../../processed_data/snv/snv_func_annot.txt fig2C_rel_position.R
+	@ echo "Making Figure 2..."
+	@ $(Rscript) fig2C_rel_position.R
 
 
 
