@@ -12,8 +12,7 @@ pkgs <- c('dplyr', 'tidyr', 'ggplot2', 'cowplot')
 load_pkgs(pkgs)
 
 options(stringsAsFactors = F, warn = -1, warnings = -1)
-plot_format <- '.png'
-plot_format_main <- '.tiff'
+plot_format <- '.tiff'
 
 data <- read.table('../../processed_data/snv/snv_data_clean.txt', 
                    sep = '\t', header = T)
@@ -214,7 +213,7 @@ gg <- ggplot(data2, aes(acceptor_phastCons)) +
 gg
 
 legend <- g_legend(gg)
-tiff(paste0('../../figs/supplement/SF9_legend_acceptor', plot_format_main), 
+tiff(paste0('../../figs/supplement/SF9_legend_acceptor', plot_format), 
      width = 100, height = 14, units = 'mm', res = 300)
 grid.newpage()
 grid.draw(legend)
@@ -239,7 +238,7 @@ gg <- ggplot(data2, aes(donor_phastCons)) +
 gg
 
 legend <- g_legend(gg)
-tiff(paste0('../../figs/supplement/SF9_legend_donor', plot_format_main), 
+tiff(paste0('../../figs/supplement/SF9_legend_donor', plot_format), 
      width = 100, height = 14, units = 'mm', res = 300)
 grid.newpage()
 grid.draw(legend)

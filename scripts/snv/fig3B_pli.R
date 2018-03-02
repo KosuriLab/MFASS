@@ -12,7 +12,7 @@ load_pkgs(pkgs)
 options(stringsAsFactors = F, warn = -1, warnings = -1)
 
 plot_format <- '.tiff'
-hi_res <- 300
+hi_res <- 600
 
 data <- read.table('../../processed_data/snv/snv_func_annot.txt', sep = '\t', header = T)
 data <- data %>%

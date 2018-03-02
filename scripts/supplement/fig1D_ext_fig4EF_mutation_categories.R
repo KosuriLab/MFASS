@@ -14,7 +14,6 @@ load_pkgs(pkgs)
 
 options(stringsAsFactors = F, warn = -1, warnings = -1)
 
-plot_format_main <- '.tiff'
 plot_format <- '.tiff'
 hi_res <- 600
 jitter_alpha <- 0.10
@@ -85,7 +84,7 @@ other_labels <- c('conserved 1nt', 'conservered 3nt',
 
 # SMN1 intron backbone INCLUDED
 gg <- data %>% 
-  filter(seq_type == 'mut', nat_index_smn1 >= 0.50) %>% 
+  filter(seq_type == 'mut', nat_index_smn1 >= 0.75) %>% 
   mutate(category_fctr = factor(category,
                                 levels = c(splice_site_categories, 
                                            esr_categories, 
@@ -97,6 +96,7 @@ gg <- data %>%
   geom_jitter(alpha = jitter_alpha, size = 0.5, color = 'red') + 
   geom_boxplot(alpha = 0) +
   geom_hline(yintercept = -0.5, linetype = 'dashed') +
+  scale_y_continuous(limits = c(-1, 1)) +
   scale_x_discrete(labels = c(splice_site_labels, esr_labels, 
                               random_exon_labels, intron_labels, 
                               random_intron_labels, other_labels)) +
@@ -115,7 +115,7 @@ gg_no_x_axis <- gg + theme(axis.text.x = element_blank())
 
 
 ggsave(paste0('../../figs/sre/smn1/', 
-              'ext_fig4E_smn1_all_categories_no_x_axis_INCLUDED', plot_format_main), 
+              'ext_fig4E_smn1_all_categories_no_x_axis_INCLUDED', plot_format), 
        gg_no_x_axis, width = 12, height = 3, dpi = hi_res)
 
 

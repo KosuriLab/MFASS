@@ -14,7 +14,6 @@ load_pkgs(pkgs)
 
 options(stringsAsFactors = F, warn = -1, warnings = -1)
 
-plot_format_main <- '.tiff'
 plot_format <- '.png'
 hi_res <- 600
 jitter_alpha <- 0.10

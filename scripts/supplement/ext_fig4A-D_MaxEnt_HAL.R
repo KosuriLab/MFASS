@@ -14,7 +14,6 @@ load_pkgs(pkgs)
 
 options(stringsAsFactors = F, warn = -1, warnings = -1)
 
-plot_format_main <- '.tiff'
 plot_format <- '.tiff'
 hi_res <- 600
 jitter_alpha <- 0.10
@@ -98,7 +97,7 @@ gg <- data %>%
         legend.position = 'none') 
 
 ggsave(paste0('../../figs/sre/smn1/ext_fig4A_smn1_don_acc_INCLUDED', 
-              plot_format_main), gg, 
+              plot_format), gg, 
        width = 4.6, height = 3, dpi = hi_res, scale = 1.3)
 
 # MaxEnt: splice acceptor and donor score fold-change
@@ -139,7 +138,7 @@ gg <- data %>%
         legend.position = 'none') 
 
 ggsave(paste0('../../figs/sre/smn1/ext_fig4B_smn1_don_acc_EXCLUDED', 
-              plot_format_main), gg, 
+              plot_format), gg, 
        width = 4.6, height = 3, dpi = hi_res, scale = 1.3)
 
 ###############################################################################
@@ -190,7 +189,7 @@ gg <- data %>%
            legend.position = 'none')
 
 ggsave(paste0('../../figs/sre/smn1/ext_fig4C_smn1_hal_INCLUDED', 
-              plot_format_main), gg, 
+              plot_format), gg, 
        width = 2.5, height = 3, dpi = hi_res, scale = 1.3)
 
 # SMN1 intron backbone EXCLUDED
@@ -218,5 +217,5 @@ gg <- data %>%
            legend.position = 'none')
 
 ggsave(paste0('../../figs/sre/smn1/ext_fig4D_smn1_hal_EXCLUDED', 
-              plot_format_main), gg, 
+              plot_format), gg, 
        width = 2.5, height = 3, dpi = hi_res, scale = 1.3)

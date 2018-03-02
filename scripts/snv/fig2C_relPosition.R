@@ -12,9 +12,8 @@ load_pkgs(pkgs)
 
 options(stringsAsFactors = F, warn = -1, warnings = -1)
 
-hi_res <- 300
-plot_format_main <- '.png'
-plot_format <- '.png'
+hi_res <- 600
+plot_format <- '.tiff'
 
 data <- read.table('../../processed_data/snv/snv_func_annot.txt',
                    sep = '\t', header = T)
@@ -79,7 +78,7 @@ tmp %>%
        y = '',
        color = '')
 
-ggsave(paste0('../../figs/snv/fig2C_sdv_rate_line_graph', '.png'),
+ggsave(paste0('../../figs/snv/fig2C_sdv_rate_line_graph', plot_format),
        width = 11, height = 3, units = 'in')
 
 ###############################################################################
@@ -119,7 +118,7 @@ dev.off()
 
 index_tile <- index_tile_with_legend + theme(legend.position = 'none')
 
-ggsave(paste0('../../figs/snv/fig2C_snv_index_tile', '.png'),
+ggsave(paste0('../../figs/snv/fig2C_snv_index_tile', plot_format),
     width = 11, height = 1, units = 'in')
 
 
@@ -278,7 +277,7 @@ phylop_tile <- data %>%
     labs(y = '', x = '', fill = '') +
     viridis::scale_fill_viridis()
 phylop_tile
-ggsave(filename = paste0("../../figs/snv/fig2C_snv_phylop_tile", '.png'), 
+ggsave(filename = paste0("../../figs/snv/fig2C_snv_phylop_tile", plot_format), 
        plot = phylop_tile,
        width = 11, height = 1, units = 'in')
 
@@ -307,5 +306,5 @@ snp_density_tile <- ref %>%
     viridis::scale_fill_viridis() +
     labs(x = '', y = '', fill = '')
 
-ggsave(paste0('../../figs/snv/fig2C_snv_density', '.png'),
+ggsave(paste0('../../figs/snv/fig2C_snv_density', plot_format),
     width = 11, height = 1, units = 'in')
