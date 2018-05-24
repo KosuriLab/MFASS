@@ -170,7 +170,8 @@ colnames(vep) <- c('id', 'location', 'alt_allele', 'ensembl_gene_id_vep',
 
 ensembl <- biomaRt::useMart('ENSEMBL_MART_ENSEMBL', dataset = 'hsapiens_gene_ensembl')
 gene_info <- biomaRt::getBM(attributes = c('ensembl_gene_id', 'start_position', 'end_position',
-                                           'external_gene_name', 'gene_biotype', 'hgnc_id', 'hgnc_symbol'), 
+                                           'external_gene_name', 'external_gene_source', 
+                                           'gene_biotype', 'hgnc_id', 'hgnc_symbol'), 
                             mart = ensembl,
                             filters = 'ensembl_gene_id',
                             values = vep$ensembl_gene_id_vep)
@@ -179,7 +180,7 @@ gene_info <- gene_info %>%
     mutate(gene_length = end_position - start_position)
 
 vep <- vep %>% 
-    left_join(select(gene_info, ensembl_gene_id, gene_biotype, gene_length),
+    left_join(select(gene_info, -start_position, -end_position),
               by = c('ensembl_gene_id_vep' = 'ensembl_gene_id'))
 
 # filter out any entries with distance in extra column, we don't want distal transcripts
@@ -195,7 +196,8 @@ vep <- vep %>%
 data_with_duplicates <- left_join(select(data, id:HGNC_ID,
                                          ensembl_gene_id_exac = ensembl_gene_id,
                                          ensembl_feature_id:AF), 
-                 select(vep, id, location, ensembl_gene_id_vep, consequence, strand_vep,
+                 select(vep, id, location, ensembl_gene_id_vep, external_gene_name,
+                        external_gene_source, consequence, strand_vep,
                         gene_biotype, gene_length) %>% 
                      distinct(ensembl_gene_id_vep, location, .keep_all = T), 
                  by = 'id')
