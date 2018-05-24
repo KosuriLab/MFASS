@@ -195,7 +195,7 @@ vep <- vep %>%
 data_with_duplicates <- left_join(select(data, id:HGNC_ID,
                                          ensembl_gene_id_exac = ensembl_gene_id,
                                          ensembl_feature_id:AF), 
-                 select(vep, id, ensembl_gene_id_vep, consequence, strand_vep,
+                 select(vep, id, location, ensembl_gene_id_vep, consequence, strand_vep,
                         gene_biotype, gene_length) %>% 
                      distinct(ensembl_gene_id_vep, location, .keep_all = T), 
                  by = 'id')
@@ -459,8 +459,8 @@ tested_exons <- data.frame(id = c(tested_intron, tested_syn,
                                     rep('splice_region', length(tested_splice_region)),
                                     rep('missense', length(tested_missense))))
 tested_exons <- tested_exons %>% 
-    left_join(select(data, id, Gene, SYMBOL, gene_length, 
-                     snp_position, snp_position_hg38_0based_start,EXON), by = 'id') %>% 
+    left_join(select(data, id, ensembl_gene_id, symbol, gene_length, 
+                     snp_position, snp_position_hg38_0based_start, exon), by = 'id') %>% 
     arrange(gene_length)
 
 write.table(sdv %>% 

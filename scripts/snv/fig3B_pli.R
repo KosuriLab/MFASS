@@ -43,57 +43,28 @@ counts <- data %>%
     tally() %>% 
     mutate(pct = n / sum(n))
 
-# intolerant_percent =  num_intolerant_lof / (num_intolerant_lof + num_intolerant_not_lof) * 100
-# tolerant_percent = num_tolerant_lof / (num_tolerant_not_lof + num_tolerant_lof) * 100
-# percent.df <-data.frame( fraction_of_strong_LoF_genes = c(intolerant_percent, tolerant_percent), 
-#                          tolerance = c('intolerant', 'tolerant'))
-
 color_pli = "black"
-
-# percent.df %>%
-#   ggplot(aes(tolerance, fraction_of_strong_LoF_genes)) +
-#   geom_col(width = 0.65, color = color_pli, fill = color_pli) +
-#   ylab("% SDV") + xlab("pLI") + ylim(0,5) +
-#   geom_hline(yintercept = 1050/27733*100, linetype = "dashed", color = "grey40") +
-#   scale_y_continuous(expand = c(0, 0)) +
-#   expand_limits(y = 4.8) +
-#   # coord_equal(1/1.125) +
-#   theme_bw() +
-#   theme(legend.position = 'none',
-#         panel.grid.major = element_blank(),
-#         panel.grid.minor = element_blank(),
-#         panel.border = element_rect(fill = NA, color = "grey50"),
-#         axis.title.y = element_text(size = 16, color = "black", vjust = 2),
-#         axis.title.x = element_text(size = 20, color = "black", vjust = -0.5),
-#         axis.ticks.x = element_blank(),
-#         axis.text.y = element_text(size = 12, color = "grey20"),
-#         axis.text.x = element_text(size = 13, color = "black"))
-
-counts %>%
-    filter(sdv == 'SDV') %>% 
-    ggplot(aes(tolerance, pct*100)) + 
-    geom_col(width = 0.65, color = color_pli, fill = color_pli) + 
-    ylab("% SDV") + xlab("pLI") + ylim(0,5) +
-    geom_hline(yintercept = 1050/27733*100, linetype = "dashed", color = "grey40") +
-    scale_y_continuous(expand = c(0, 0)) + 
-    expand_limits(y = 4.8) +
-    # coord_equal(1/1.125) +
-    theme_bw() +
-    theme(legend.position = 'none', 
-          panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          panel.border = element_rect(fill = NA, color = "grey50"),
-          axis.title.y = element_text(size = 16, color = "black", vjust = 2),
-          axis.title.x = element_text(size = 20, color = "black", vjust = -0.5),
-          axis.ticks.x = element_blank(),
-          axis.text.y = element_text(size = 12, color = "grey20"),
-          axis.text.x = element_text(size = 13, color = "black")) 
+# counts %>%
+#     filter(sdv == 'SDV') %>% 
+#     ggplot(aes(tolerance, pct*100)) + 
+#     geom_col(width = 0.65, color = color_pli, fill = color_pli) + 
+#     ylab("% SDV") + xlab("pLI") + ylim(0,5) +
+#     geom_hline(yintercept = 1050/27733*100, linetype = "dashed", color = "grey40") +
+#     scale_y_continuous(expand = c(0, 0)) + 
+#     expand_limits(y = 4.8) +
+#     # coord_equal(1/1.125) +
+#     theme_bw() +
+#     theme(legend.position = 'none', 
+#           panel.grid.major = element_blank(),
+#           panel.grid.minor = element_blank(),
+#           panel.border = element_rect(fill = NA, color = "grey50"),
+#           axis.title.y = element_text(size = 16, color = "black", vjust = 2),
+#           axis.title.x = element_text(size = 20, color = "black", vjust = -0.5),
+#           axis.ticks.x = element_blank(),
+#           axis.text.y = element_text(size = 12, color = "grey20"),
+#           axis.text.x = element_text(size = 13, color = "black")) 
 # 
-# df <- matrix(c(num_intolerant_lof, num_tolerant_lof,
-#                num_intolerant_not_lof, num_tolerant_not_lof),
-#              nrow = 2,
-#              dimnames = list(c('pLI >= 0.90', 'pLI < 0.90'),
-#                              c('dPSI <= -0.50', 'dPSI > -0.50')))
+
 # current matrix arrangement tests for significantly greater proportion of non-SDVs
 # in intolerant genes, equivalent to significantly fewer proportion of SDVS in intolerant
 # genes if you rearranged the matrix
@@ -105,6 +76,38 @@ ggsave(paste0("../../figs/snv/fig3B_pLI_enrichment", plot_format),
 
 
 # compare rate of PTVs in pLI genes to SDVs
-tmp <- data %>% 
-    mutate(ptv = ifelse(consequence %in% c('stop_gained', 'splice_acceptor_variant',
-                                           'splice_donor_variant', '')))
+data <- data %>% 
+    mutate(ptv = ifelse(consequence %in% c('stop_gained', 
+                                           'splice_acceptor_variant',
+                                           'splice_donor_variant'),
+                        'PTV', 'non-PTV'))
+
+counts <- data %>% 
+    filter(!is.na(pLI_high)) %>% 
+    mutate(tolerance = ifelse(pLI_high == T, 'intolerant', 'tolerant')) %>% 
+    group_by(tolerance, ptv) %>% 
+    tally() %>% 
+    mutate(pct = n / sum(n)) %>% 
+    rename(type = ptv) %>% 
+    bind_rows(rename(counts, type = sdv))
+    
+counts %>% 
+    filter(type == 'PTV' | type == 'SDV') %>% 
+    ggplot(aes(tolerance, pct*100)) + 
+    geom_bar(stat = 'identity', position = 'dodge', aes(fill = type)) + 
+    scale_fill_manual(values = c('black', 'darkblue')) + 
+    labs(x = 'pLI', y = 'percentage', fill = 'variant type') + ylim(0,5) +
+    geom_hline(yintercept = 1050/27733*100, linetype = "dashed", color = "grey40") +
+    geom_hline(yintercept = 340/27733*100, linetype = "dashed", color = "blue") +
+    scale_y_continuous(expand = c(0, 0)) + 
+    expand_limits(y = 4.8) +
+    # coord_equal(1/1.125) +
+    theme_bw() +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(fill = NA, color = "grey50"),
+          axis.title.y = element_text(size = 16, color = "black", vjust = 2),
+          axis.title.x = element_text(size = 20, color = "black", vjust = -0.5),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_text(size = 12, color = "grey20"),
+          axis.text.x = element_text(size = 13, color = "black")) 
