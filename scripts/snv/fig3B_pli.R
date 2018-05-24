@@ -44,26 +44,26 @@ counts <- data %>%
     mutate(pct = n / sum(n))
 
 color_pli = "black"
-# counts %>%
-#     filter(sdv == 'SDV') %>% 
-#     ggplot(aes(tolerance, pct*100)) + 
-#     geom_col(width = 0.65, color = color_pli, fill = color_pli) + 
-#     ylab("% SDV") + xlab("pLI") + ylim(0,5) +
-#     geom_hline(yintercept = 1050/27733*100, linetype = "dashed", color = "grey40") +
-#     scale_y_continuous(expand = c(0, 0)) + 
-#     expand_limits(y = 4.8) +
-#     # coord_equal(1/1.125) +
-#     theme_bw() +
-#     theme(legend.position = 'none', 
-#           panel.grid.major = element_blank(),
-#           panel.grid.minor = element_blank(),
-#           panel.border = element_rect(fill = NA, color = "grey50"),
-#           axis.title.y = element_text(size = 16, color = "black", vjust = 2),
-#           axis.title.x = element_text(size = 20, color = "black", vjust = -0.5),
-#           axis.ticks.x = element_blank(),
-#           axis.text.y = element_text(size = 12, color = "grey20"),
-#           axis.text.x = element_text(size = 13, color = "black")) 
-# 
+counts %>%
+    filter(sdv == 'SDV') %>%
+    ggplot(aes(tolerance, pct*100)) +
+    geom_col(width = 0.65, color = color_pli, fill = color_pli) +
+    ylab("% SDV") + xlab("pLI") + ylim(0,5) +
+    geom_hline(yintercept = 1050/27733*100, linetype = "dashed", color = "grey40") +
+    scale_y_continuous(expand = c(0, 0)) +
+    expand_limits(y = 4.8) +
+    # coord_equal(1/1.125) +
+    theme_bw() +
+    theme(legend.position = 'none',
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(fill = NA, color = "grey50"),
+          axis.title.y = element_text(size = 16, color = "black", vjust = 2),
+          axis.title.x = element_text(size = 20, color = "black", vjust = -0.5),
+          axis.ticks.x = element_blank(),
+          axis.text.y = element_text(size = 12, color = "grey20"),
+          axis.text.x = element_text(size = 13, color = "black"))
+
 
 # current matrix arrangement tests for significantly greater proportion of non-SDVs
 # in intolerant genes, equivalent to significantly fewer proportion of SDVS in intolerant

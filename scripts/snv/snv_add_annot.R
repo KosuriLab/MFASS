@@ -248,8 +248,22 @@ data <- data_no_duplicates %>%
     mutate(symbol = ifelse(is.na(symbol), symbol[category == 'mutant'], symbol),
            ensembl_gene_id = ifelse(is.na(ensembl_gene_id), 
                                     ensembl_gene_id[category == 'mutant'],
-                                    ensembl_gene_id)) %>% 
+                                    ensembl_gene_id),
+           external_gene_name = ifelse(is.na(external_gene_name), 
+                                       unique(external_gene_name), 
+                                       external_gene_name)) %>% 
     ungroup()
+
+# fill in external_gene_name for those that are missing but have other entries 
+# with ensembl_gene_id with information
+data <- data %>% 
+    group_by(ensembl_gene_id) %>% 
+    filter(any(!is.na(external_gene_name))) %>% 
+    mutate(external_gene_name = ifelse(is.na(external_gene_name), 
+                                       unique(external_gene_name), 
+                                       external_gene_name)) %>% 
+    ungroup()
+    
 
 rm(data_with_duplicates, duplicates, data_no_duplicates, missing)
 
@@ -411,9 +425,22 @@ data <- data %>%
 pli_table <- read.table('../../ref/snv/fordist_cleaned_exac_r03_march16_z_pli_rec_null_data.txt',
                         sep = '\t', header = T)
 
-data <- data %>% 
-    left_join(select(pli_table, gene, pLI), by = c('symbol' = 'gene')) %>% 
+data <-  data %>%
+    left_join(select(pli_table, gene, pLI), by = c('external_gene_name' = 'gene')) %>%
     mutate(pLI_high = ifelse(pLI >= 0.90, TRUE, FALSE))
+
+# tmp <- data %>% 
+#     left_join(select(pli_table, gene, pLI), by = c('symbol' = 'gene')) %>% 
+#     mutate(pLI_high = ifelse(pLI >= 0.90, TRUE, FALSE))
+# 
+# tmp2 <-  data %>% 
+#     left_join(select(pli_table, gene, pLI), by = c('external_gene_name' = 'gene')) %>% 
+#     mutate(pLI_high = ifelse(pLI >= 0.90, TRUE, FALSE))
+# 
+# tmp3 <- left_join(select(tmp, id, pLI_high_symbol = pLI_high, symbol),
+#                   select(tmp2, id, pLI_high_name = pLI_high, external_gene_name))
+# 
+# table(select(tmp3, pLI_high_symbol, pLI_high_name))
 
 write.table(data, '../../processed_data/snv/snv_func_annot.txt',
             sep = '\t', quote = F, row.names = F)
