@@ -111,4 +111,65 @@ ggsave(paste0('../../figs/snv/fig4B_SIFT_SDVs_missense', plot_format),
        width = 5, height = 2.1, dpi = hi_res) 
 
 
+# Clinvar
+sdvs <- filter(data, strong_lof == T)
+# hg19 coordinates
+clinvar <- read.table('../../ref/clinvar_variant_summary.txt',
+                      header = F, sep = '\t', fill = T)
+names <- c('AlleleID', 'Type', 'Name', 'GeneID', 'GeneSymbol',	'HGNC_ID',
+           'ClinicalSignificance',	'ClinSigSimple', 'LastEvaluated', 
+           'rsid', 'nsv_esv_dbvar',	'RCVaccession',	'PhenotypeIDS',	'PhenotypeList',
+           'Origin', 'OriginSimple', 'Assembly', 'ChromosomeAccession',
+           'Chromosome', 'Start', 'Stop', 'ReferenceAllele', 'AlternateAllele',
+           'Cytogenetic', 'ReviewStatus', 'NumberSubmitters', 'Guidelines',
+           'TestedInGTR', 'OtherIDs', 'SubmitterCategories', 'VariationID')
+names(clinvar) <- names
+# join based on chromosome and SNP position
+clinvar_sdvs <- clinvar %>% 
+    mutate(Start = as.numeric(Start)) %>% 
+    semi_join(sdvs, by = c('Chromosome' = 'chr', 'Start' = 'snp_position')) %>% 
+    left_join(select(sdvs, id, v2_dpsi, strong_lof, consequence, chr, snp_position, ref_allele, alt_allele),
+              by = c('Chromosome' = 'chr', 'Start' = 'snp_position')) %>% 
+    select(id, v2_dpsi, consequence, Type, GeneSymbol, ClinicalSignificance,
+           Chromosome, Start, strong_lof,
+           ref_allele, ReferenceAllele, alt_allele, AlternateAllele) %>% 
+    filter(ref_allele == ReferenceAllele)
 
+clinvar_snvs <- clinvar %>% 
+    mutate(Start = as.numeric(Start)) %>% 
+    semi_join(data, by = c('Chromosome' = 'chr', 'Start' = 'snp_position')) %>% 
+    left_join(select(data, id, v2_dpsi, strong_lof, consequence, chr, snp_position, ref_allele, alt_allele),
+              by = c('Chromosome' = 'chr', 'Start' = 'snp_position')) %>% 
+    select(id, v2_dpsi, consequence, Type, GeneSymbol, ClinicalSignificance,
+           Chromosome, Start, strong_lof,
+           ref_allele, ReferenceAllele, alt_allele, AlternateAllele) %>% 
+    filter(ref_allele == ReferenceAllele)
+    
+
+df1 <- clinvar_snvs %>% 
+    filter(strong_lof == T) %>% 
+    group_by(ClinicalSignificance) %>% 
+    tally() %>% 
+    mutate(pct = n / sum(n),
+           sdv = 'SDV (n = 8)')
+    
+df2 <- clinvar_snvs %>% 
+    filter(strong_lof == F) %>% 
+    group_by(ClinicalSignificance) %>% 
+    tally() %>% 
+    mutate(pct = n / sum(n),
+           sdv = 'all SNVs (n = 141)')
+
+df3 <-  clinvar_snvs %>% 
+    filter(strong_lof == F) %>% 
+    group_by(ClinicalSignificance) %>% 
+    tally() %>% 
+    mutate(pct = n / sum(n),
+           sdv = 'nonSDV (n = 133)')
+
+bind_rows(df1, df2, df3) %>% 
+    ggplot(aes(ClinicalSignificance, pct)) + 
+    geom_bar(stat = 'identity', position = 'dodge', aes(fill = sdv)) + 
+    labs(y = 'percentage', x = 'Clinvar significance') +
+    # theme(axis.text.x = element_text(angle = 45)) + 
+    coord_flip()

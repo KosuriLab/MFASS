@@ -136,3 +136,39 @@ data <- data %>%
     ungroup()
 
 write.table(data, '../../processed_data/sre/sre_data_clean.txt', sep ='\t', row.names = F)
+
+data %>% 
+    ggplot(aes(index_R1_smn1, index_R2_smn1)) + 
+    geom_point(alpha = 0.10) +
+    geom_density2d(color = 'black') + 
+    geom_abline(linetype = 'dashed', intercept = 0.30) +
+    geom_abline(linetype = 'dashed', intercept = -0.30) +
+    scale_x_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1)) +
+    scale_y_continuous(breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1), limits = c(0, 1)) +
+    scale_color_manual(values = c('black', '#0033CC')) +
+    labs(x = 'inclusion index (Rep. 1)', y = 'inclusion index (Rep. 2)') +
+    theme(legend.position = 'none',
+          axis.title.x = element_text(size = 20, vjust = -2), 
+          axis.title.y = element_text(size = 20, vjust = +4),
+          axis.text.x = element_text(size = 14, color = 'grey20'),
+          axis.text.y = element_text(size = 14, color = 'grey20'),
+          axis.ticks.x = element_line(color = 'grey50'),
+          axis.ticks.y = element_line(color = 'grey50'),
+          axis.line.x = element_line(color = 'grey50'),
+          axis.line.y = element_line(color = 'grey50'),
+          plot.margin = unit(c(2,2,3,3),"mm"))
+
+# overall SDV rate
+data %>% 
+    filter(rep_quality == 'high', seq_type == 'mut') %>% 
+    mutate(sdv = ifelse((dpsi_smn1 <= -0.50) & nat_index_smn1 >= 0.5, T, F)) %>% 
+    group_by(sdv) %>% 
+    tally() %>% 
+    mutate(pct = n / sum(n))
+
+data %>% 
+    filter(rep_quality == 'high', seq_type == 'mut') %>% 
+    mutate(sdv = ifelse((dpsi_dhfr <= -0.50) & nat_index_dhfr >= 0.5, T, F)) %>% 
+    group_by(sdv) %>% 
+    tally() %>% 
+    mutate(pct = n / sum(n))
