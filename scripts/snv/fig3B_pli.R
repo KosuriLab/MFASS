@@ -111,3 +111,36 @@ counts %>%
           axis.ticks.x = element_blank(),
           axis.text.y = element_text(size = 12, color = "grey20"),
           axis.text.x = element_text(size = 13, color = "black")) 
+
+
+# GO term enrichment in SDV genes
+ensembl <- biomaRt::useMart('ENSEMBL_MART_ENSEMBL', dataset = 'hsapiens_gene_ensembl')
+gene_info <- biomaRt::getBM(attributes = c('ensembl_gene_id', 'external_gene_name', 
+                                           'go_id', 'name_1006', 'definition_1006'), 
+                            mart = ensembl,
+                            filters = 'ensembl_gene_id',
+                            values = data$ensembl_gene_id)
+source("http://bioconductor.org/biocLite.R")
+biocLite('topGO')
+biocLite("org.Hs.eg.db")
+library(topGO)
+
+nonsdv_genes <- data %>% filter(sdv == 'non-SDV') %>% .$ensembl_gene_id
+sdv_genes <- data %>% filter(sdv == 'SDV') %>% .$ensembl_gene_id
+all_genes <- data$ensembl_gene_id
+gene_list <- factor(as.integer(all_genes %in% sdv_genes))
+names(gene_list) <- all_genes
+
+GOdata <- new('topGOdata',
+              ontology = 'BP',
+              allGenes = gene_list,
+              annot = annFUN.org,
+              mapping = 'org.Hs.eg.db',
+              ID = 'ensembl',
+              nodeSize = 10)
+# over-representation of GO terms within the group of SDV genes, each category
+# tested independently
+go_fisher <- runTest(GOdata, algorithm = 'classic', statistic = 'fisher')
+# significant genes correspond to genes of interest
+# non-trivial nodes are GO categories which have at least one significant gene annotated
+result <- GenTable(GOdata, classicFisher = go_fisher)

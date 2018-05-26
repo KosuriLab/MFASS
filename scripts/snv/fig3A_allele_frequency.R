@@ -149,3 +149,6 @@ mutant %>%
     geom_histogram(binwidth = 1) +
     scale_y_log10() + annotation_logticks(sides = 'l') + 
     labs(x = 'percentage', title = 'Percentage of SDVs per exon')
+
+# gnomad
+
