@@ -429,18 +429,40 @@ data <-  data %>%
     left_join(select(pli_table, gene, pLI), by = c('external_gene_name' = 'gene')) %>%
     mutate(pLI_high = ifelse(pLI >= 0.90, TRUE, FALSE))
 
-# tmp <- data %>% 
-#     left_join(select(pli_table, gene, pLI), by = c('symbol' = 'gene')) %>% 
-#     mutate(pLI_high = ifelse(pLI >= 0.90, TRUE, FALSE))
-# 
-# tmp2 <-  data %>% 
-#     left_join(select(pli_table, gene, pLI), by = c('external_gene_name' = 'gene')) %>% 
-#     mutate(pLI_high = ifelse(pLI >= 0.90, TRUE, FALSE))
-# 
-# tmp3 <- left_join(select(tmp, id, pLI_high_symbol = pLI_high, symbol),
-#                   select(tmp2, id, pLI_high_name = pLI_high, external_gene_name))
-# 
-# table(select(tmp3, pLI_high_symbol, pLI_high_name))
+
+###############################################################################
+# gnomad
+###############################################################################
+
+# gnomad
+# write file with chromosome and positions to extract from VCF
+data %>% 
+    select(chr, snp_position) %>% 
+    write.table('../../processed_data/snv/snv_positions.txt', sep = '\t',
+                quote = F, row.names = F, col.names = F)
+
+# command run on server
+# filters out variants that did not pass filter, outputs AF
+# system(paste('vcftools --gzvcf ../../ref/gnomad.exomes.r2.0.2.sites.vcf.bgz',
+#              '--recode --out snv_gnomad --positions snv_positions.txt',
+#              '--recode-INFO AF --remove-filtered-all'))
+
+# vcftools --gzvcf ../../ref/gnomad.exomes.r2.0.2.sites.vcf.bgz --recode --out snv_gnomad --positions snv_positions.txt
+
+gnomad <- read.table('../../processed_data/snv/snv_gnomad.recode.vcf',
+                     header = F, col.names = c('chr', 'position', 'rsid',
+                                               'ref_allele', 'alt_allele', 'quality',
+                                               'filter', 'AF_gnomad')) %>% 
+    mutate(AF_gnomad = strsplit(AF_gnomad, ','),
+           alt_allele = strsplit(alt_allele, ',')) %>% 
+    unnest(AF_gnomad, alt_allele) %>% 
+    mutate(AF_gnomad = gsub('AF=', '', AF_gnomad),
+           AF_gnomad = as.numeric(AF_gnomad))
+    
+
+data <- left_join(data, 
+                 select(gnomad, chr, position, ref_allele, alt_allele, AF_gnomad), 
+                 by = c('chr', 'snp_position' = 'position', 'ref_allele', 'alt_allele'))
 
 write.table(data, '../../processed_data/snv/snv_func_annot.txt',
             sep = '\t', quote = F, row.names = F)

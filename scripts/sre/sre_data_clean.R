@@ -135,7 +135,15 @@ data <- data %>%
            nat_index_dhfr = mean(c(nat_index_R1_dhfr, nat_index_R2_dhfr))) %>% 
     ungroup()
 
-write.table(data, '../../processed_data/sre/sre_data_clean.txt', sep ='\t', row.names = F)
+# create column for natural
+data <- data %>% 
+    group_by(ensembl_id) %>%
+    mutate(natural_seq = ifelse(any(sub_id == '000'), 
+                                seq[sub_id == '000'],
+                                NA)) %>%
+    ungroup()   
+
+write.table(data, '../../processed_data/sre/sre_data_clean.txt', sep ='\t', row.names = F, quote = T)
 
 data %>% 
     ggplot(aes(index_R1_smn1, index_R2_smn1)) + 

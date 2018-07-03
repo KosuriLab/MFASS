@@ -96,7 +96,6 @@ ref <- ref %>%
                   select(-chr), by = 'id') %>% 
     mutate(id = ifelse(grepl('_', id), id, paste(ensembl_id, sub_id, sep = '_')))
 
-                 
 write.table(ref, '../../ref/sre/sre_ref_formatted_converted.txt',
   sep = '\t', row.names = F, col.names = T)
 
