@@ -3,6 +3,8 @@ library(ggplot2)
 library(cowplot)
 
 options(stringsAsFactors = F, scipen = 10000)
+fig_folder <- '../../../figs/fig2/'
+plot_format <- '.pdf'
 
 data <- read.table('../../../processed_data/sre/sre_data_mut_changes.txt', sep = '\t', header = T)
 
@@ -24,7 +26,8 @@ levels(data$category_rename) <- c('all_mut_both', 'all_mut_exon', 'all_mut_intro
                                   'weaken_acceptor_region', 'weaken_donor_region')
 
 data <- data %>% 
-    mutate(sdv = ifelse(dpsi_smn1 <= -0.50 & nat_index_smn1 >= 0.50, 'SDV', 'non-SDV'))
+    filter(nat_index_smn1 >= 0.50, rep_quality == 'high') %>% 
+    mutate(sdv = ifelse(dpsi_smn1 <= -0.50, 'SDV', 'non-SDV'))
 
 
 data$category_rename <- factor(data$category_rename,
@@ -47,7 +50,7 @@ gg1 <- data %>%
     theme(axis.text.y = element_blank())
 gg1
 
-ggsave(filename = '../../figs/sre/category_delta_index.pdf', width = 3.5, height = 7)
+ggsave(paste0(fig_folder, 'category_delta_index', plot_format), width = 3.5, height = 7)
 
 num_changes <- data %>% 
     filter(seq_type == 'mut', !is.na(sdv)) %>% 
@@ -62,5 +65,3 @@ percent_sdv <- data %>%
     mutate(pct = 100 * (n / sum(n))) %>% 
     filter(sdv == 'SDV')
     
-
-

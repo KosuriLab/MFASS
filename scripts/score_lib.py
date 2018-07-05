@@ -180,10 +180,10 @@ if __name__ == '__main__':
     
     # calculate max change in score between mutant and naturals
     # read in naturals
-    # data['max_HAL_score_change'] = data.apply(lambda x: max_score_change(x['natural_seq'],
-    #                                                                 x[seq_name], 
-    #                                                                 HAL_score_dict, 6,
-    #                                                                 x['rel_position']), axis=1)
+    data['max_HAL_score_change'] = data.apply(lambda x: max_score_change(x['natural_seq'],
+                                                                    x[seq_name], 
+                                                                    HAL_score_dict, 6,
+                                                                    x['rel_position']), axis=1)
 
     # calculate overall Ke score
     ESE_motifs = pd.read_table('./data/motifs/Ke2011/ESEseq.txt',

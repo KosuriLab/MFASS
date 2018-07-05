@@ -112,6 +112,20 @@ data <- data %>%
            replicability_dhfr = ifelse(abs(index_R1_dhfr - index_R2_dhfr) <= rep_agreement, 'high', 'low'),
            replicability_smn1 = ifelse(abs(index_R1_smn1 - index_R2_smn1) <= rep_agreement, 'high', 'low'))
 
+data %>% 
+    filter(rep_quality == 'high') %>% 
+    mutate(index_R1_dhfr_bimodal = ifelse(index_R1_dhfr <= 0.50, 0, 1),
+           index_R2_dhfr_bimodal = ifelse(index_R2_dhfr <= 0.50, 0, 1)) %>% 
+    select(index_R1_dhfr_bimodal, index_R2_dhfr_bimodal) %>% 
+    psych::tetrachoric()
+
+data %>% 
+    filter(rep_quality == 'high') %>% 
+    mutate(index_R1_smn1_bimodal = ifelse(index_R1_smn1 <= 0.50, 0, 1),
+           index_R2_smn1_bimodal = ifelse(index_R2_smn1 <= 0.50, 0, 1)) %>% 
+    select(index_R1_smn1_bimodal, index_R2_smn1_bimodal) %>% 
+    psych::tetrachoric()
+
 # calculate difference in splicing index between mutant and natural
 data <- data %>% 
     group_by(ensembl_id) %>% 
