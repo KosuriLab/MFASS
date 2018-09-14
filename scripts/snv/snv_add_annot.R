@@ -437,8 +437,10 @@ data <-  data %>%
 # gnomad
 # write file with chromosome and positions to extract from VCF
 data %>% 
+    filter(!is.na(snp_position)) %>% 
+    mutate(chr = gsub('chr', '', chr)) %>% 
     select(chr, snp_position) %>% 
-    write.table('../../processed_data/snv/snv_positions.txt', sep = '\t',
+    write.table('../../processed_data/snv/snv_ref_positions.txt', sep = '\t',
                 quote = F, row.names = F, col.names = F)
 
 # command run on server
@@ -449,7 +451,7 @@ data %>%
 
 # vcftools --gzvcf ../../ref/gnomad.exomes.r2.0.2.sites.vcf.bgz --recode --out snv_gnomad --positions snv_positions.txt
 
-gnomad <- read.table('../../processed_data/snv/snv_gnomad.recode.vcf',
+gnomad <- read.table('../../processed_data/snv/snv_ref_gnomad.recode.vcf',
                      header = F, col.names = c('chr', 'position', 'rsid',
                                                'ref_allele', 'alt_allele', 'quality',
                                                'filter', 'AF_gnomad')) %>% 
@@ -527,5 +529,49 @@ write.table(sdv %>%
             '../../processed_data/snv/sdv_hg38.bed', sep = '\t', quote = F, 
             row.names = F, col.names = F)
 
+
+# get updated rsIDs
+data %>% 
+    filter(category == 'mutant', chr != 'X', chr != 'Y') %>% 
+    arrange(chr) %>% 
+    mutate(chrom = paste0('chr', chr)) %>% 
+    select(chrom, snp_position) %>% 
+    write.table('../../ref/snv/snv_positions.txt', sep = '\t', quote = F, row.names = F, 
+                col.names = F)
+# sort alphanumerically
+system('sort -n -k1.4 ../../ref/snv/snv_positions.txt > ../../ref/snv/snv_positions_sorted.txt')
+
+snp138 <- read.table('../../ref/snp138.txt', sep = '\t', header = F,
+                     col.names = c('chr', 'start', 'end', 'rsid', 'strand'))
+
+# write sdv info list
+sdv_info <- data %>% 
+    filter(category == 'mutant', strong_lof == T) %>% 
+    separate(exon_number, into = c('exon_num', 'total_exons'), sep = '/') %>% 
+    mutate(total_exons = as.numeric(total_exons)) %>% 
+    dplyr::select(id, chr, snp_position, snp_position_hg38_1based,
+                  ref_allele, alt_allele, strand, label,
+           ensembl_gene_id, external_gene_name, total_exons,
+           snp_id, exon_id_new,
+           v2_dpsi, nat_v2_index,
+           AF_gnomad, consequence, mean_phastCons_score,
+           phylop_score, SIFT)
+write.table(sdv_info, '../../processed_data/snv/sdv_info.txt',
+            sep = '\t', quote = F, row.names = F)
+
+exons <- data %>% 
+    filter(category == 'mutant') %>% 
+    separate(exon_number, into = c('exon_num', 'total_exons'), sep = '/') %>% 
+    mutate(total_exons = as.numeric(total_exons)) %>% 
+    filter(!is.na(total_exons), label == 'exon') %>% 
+    dplyr::select(strong_lof, id, chr, snp_position, snp_position_hg38_1based,
+                  ref_allele, alt_allele, strand, label,
+                  ensembl_gene_id, external_gene_name, total_exons,
+                  snp_id, exon_id_new,
+                  v2_dpsi, nat_v2_index,
+                  AF_gnomad, consequence, mean_phastCons_score,
+                  phylop_score, SIFT)
+
+t.test(total_exons ~ strong_lof, tmp)
 
 

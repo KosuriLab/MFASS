@@ -30,8 +30,14 @@ data <- data %>%
     mutate(AF_bin_gnomad = cut(AF_gnomad, 
                                breaks = c(0, 0.00001, 0.000025, 0.0005, 0.005, 1), 
                                include.lowest = T,
-                               labels = c('Singleton', 'AC = 2-3', 
-                                          'AC = 4-10', '0.05-0.5%', '>0.5%' )))
+                               right = F,
+                               labels = c('< 0.001%', '[0.001, 0.0025%)', 
+                                          '[0.0025, 0.5%)', '[0.05-0.5%)', '> 0.5%' )))
+
+data <- data %>% 
+    mutate(new_AF_bin_gnomad = AF_bin_gnomad,
+           new_AF_bin_gnomad = ifelse(is.na(AF_gnomad), '1', AF_bin_gnomad))
+
 
 mutant <- data %>% 
     filter(category == 'mutant', (!is.na(v2_dpsi)), nat_v2_index >= 0.5)
@@ -70,6 +76,34 @@ sdv_mutant_v2 %>%
           axis.text.y = element_text(size = 12, color = "grey20"),
           axis.text.x = element_blank()
     ) 
+
+
+# sdv_mutant_v2 <- mutant %>% 
+#     filter(nat_v2_index >= 0.50, category == 'mutant') %>%
+#     group_by(category, new_AF_bin_gnomad) %>% 
+#     summarise(num_sdv = length(which(sdv == 'SDV')),
+#               category_num = n()) %>% 
+#     mutate(percent_sdv = num_sdv/ category_num * 100) %>%
+#     arrange(desc(num_sdv)) %>%
+#     ungroup() %>% 
+#     ggplot(aes(new_AF_bin_gnomad, percent_sdv)) + 
+#     geom_col(width = 0.8, color = "#000080", fill = "#000080") + 
+#     geom_hline(yintercept = 3.8, linetype = "dashed", color = "grey40") +
+#     labs(x = "ExAC global allele frequency", 
+#          y = "% SDV") +
+#     scale_y_continuous(expand = c(0,0)) +
+#     expand_limits(y = 4.5) +
+#     theme_bw() + 
+#     theme(legend.position = 'none', 
+#           panel.grid.major = element_blank(),
+#           panel.grid.minor = element_blank(),
+#           panel.border = element_rect(fill = NA, color = "grey50"),
+#           axis.title.y = element_text(size = 17, vjust = 12),
+#           axis.title.x = element_blank(),
+#           axis.ticks.x = element_blank(),
+#           axis.text.y = element_text(size = 12, color = "grey20"),
+#           axis.text.x = element_blank()
+#     ) 
 
 ggsave(paste0(fig_folder, "allele_frequency_gnomad_percent_sdv", plot_format), 
        width = 4, height = 2.25, units = 'in', dpi = 300)

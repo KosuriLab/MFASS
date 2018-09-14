@@ -11,7 +11,7 @@ load_pkgs(pkgs)
 
 options(stringsAsFactors = F, warn = -1, warnings = -1)
 
-plot_format <- '.tiff'
+plot_format <- '.png'
 hi_res <- 600
 
 data <- read.table('../../../processed_data/snv/snv_func_annot.txt',
@@ -31,6 +31,9 @@ data <- data %>%
     select(-SIFT_other, -PolyPhen_other)
 
 fig_folder <- '../../../figs/fig6/'
+
+data <- data %>% 
+    mutate(sdv = ifelse(v2_dpsi <= -0.5, 'SDV', 'non-SDV'))
 
 ################
 #### Polyphen
@@ -68,6 +71,35 @@ data %>%
 ggsave(paste0(fig_folder, 'polyphen_SDVs_missense', plot_format), 
        width = 5, height = 3, dpi = hi_res) 
 
+data %>%
+    filter(consequence == "missense_variant", !is.na(PolyPhen)) %>%
+    group_by(sdv, PolyPhen) %>% 
+    tally() %>% 
+    mutate(pct = (n / sum(n)) * 100) %>% 
+    ggplot(aes(PolyPhen, pct)) +
+    geom_bar(stat = 'identity', aes(fill = sdv), width = 0.6, position = 'dodge') +
+    scale_y_continuous(expand = c(0,0)) +
+    labs(x = '', 
+         y = 'percentage', fill = '') +
+    theme(legend.position = 'none',
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_rect(fill = NA, color = "grey50"),
+          # axis.title.y = element_text(vjust = 20, size = 20),
+          # axis.title.x = element_text(vjust = -20, size = 16),
+          axis.text.y = element_text(size = 14),
+          axis.text.x = element_text(size = 14),
+    ) +
+    scale_fill_manual(values = c('black', 'darkblue')) +
+    scale_x_discrete(labels = c('no annotation', 
+                                'benign', 
+                                'possibly\ndamaging', 
+                                'probably\ndamaging', 
+                                'unknown')) +
+    coord_flip()
+
+ggsave(paste0(fig_folder, 'polyPhen_all_missense', plot_format),
+       width = 5, height = 3)
 
 ############
 #### SIFT
@@ -84,9 +116,7 @@ data %>%
     geom_histogram(stat="count", width = 0.6) + 
     scale_y_continuous(expand = c(0,0)) +
     expand_limits(y = 180) +
-    # geom_jitter(alpha = 0.1) +
-    # stat_summary(fun.y = median, geom = "point", size = 3) +
-    labs(x = '',  #SIFT prediction\nfor missense SDVs
+    labs(x = '', 
          y = 'count') +
     scale_x_discrete(labels = c('no annotation', 
                                 'deleterious', 
@@ -106,3 +136,31 @@ data %>%
 
 ggsave(paste0(fig_folder, 'sift_SDVs_missense', plot_format), 
        width = 5, height = 2.1, dpi = hi_res) 
+
+
+data %>%
+    filter(consequence == "missense_variant", !is.na(SIFT)) %>%
+    filter(SIFT != "tolerated_low_confidence", SIFT != "deleterious_low_confidence") %>%
+    group_by(sdv, SIFT) %>% 
+    tally() %>% 
+    mutate(pct = (n / sum(n)) * 100) %>% 
+    ggplot(aes(SIFT, pct)) +
+    geom_bar(stat = 'identity', aes(fill = sdv), width = 0.6, position = 'dodge') +
+    scale_y_continuous(expand = c(0,0)) +
+    labs(x = '', 
+         y = 'percentage', fill = '') +
+    scale_fill_manual(values = c('black', 'darkblue')) +
+    scale_x_discrete(labels = c('no annotation', 
+                                'deleterious', 
+                                'tolerated')) +
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          # axis.title.y = element_text(size = 20, vjust = 60),
+          # axis.title.x = element_text(vjust = -20, size = 16),
+          axis.text.y = element_text(size = 14),
+          axis.text.x = element_text(size = 14)
+    ) +
+    coord_flip()
+
+ggsave(paste0(fig_folder, 'SIFT_all_missense', plot_format),
+       width = 5.5, height = 3)

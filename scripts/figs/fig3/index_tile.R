@@ -22,7 +22,7 @@ data <- data %>%
 
 dpsi_threshold <- -0.50
 
-fig_folder <- '../../../figs/fig2/'
+fig_folder <- '../../../figs/fig3/'
 
 ###############################################################################
 #### index, average index at each binned relative position, heatmap tile ###
@@ -69,3 +69,20 @@ index_tile <- index_tile_with_legend + theme(legend.position = 'none')
 
 ggsave(paste0(fig_folder, 'snv_index_tile', plot_format), index_tile,
        width = 11, height = 1, units = 'in')
+
+
+# SDVs per exon
+sdv_pct_per_exon <- data %>% 
+    mutate(sdv = ifelse(v2_dpsi <= -0.50, 'SDV', 'non-SDV')) %>% 
+    group_by(ensembl_id) %>%
+    summarise(pct = (length(which(sdv == 'SDV')) / n()) * 100)
+
+mean <- mean(sdv_pct_per_exon$pct)
+
+sdv_pct_per_exon %>% 
+    ggplot(aes(pct)) + geom_density() +
+    geom_vline(xintercept = mean, linetype = 'dashed', color = 'grey') +
+    labs(x = 'percentage of SDVs per exon', y = 'density')
+
+ggsave(paste0(fig_folder, 'sdv_pct_per_exon', plot_format),
+       width = 4, height = 4)
