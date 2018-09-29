@@ -574,4 +574,20 @@ exons <- data %>%
 
 t.test(total_exons ~ strong_lof, tmp)
 
-
+# write simple file for GEO
+data %>% 
+    select(internal_id = id,
+           ensembl_exon_id_new = exon_id_new,
+           chr,
+           construct_start_hg19 = start,
+           construct_end_hg19 = end,
+           snp_position_hg19 = snp_position,
+           ref_allele,
+           alt_allele,
+           category,
+           mut_location = label,
+           wt_index_v2 = nat_v2_index,
+           index_v2 = v2_index,
+           delta_index_v2 = v2_dpsi) %>% 
+    write.table('../../GEO/snv_exon_inclusion_index.txt',
+                quote = F, row.names = F, sep = '\t')

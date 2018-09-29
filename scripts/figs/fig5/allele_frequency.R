@@ -127,7 +127,7 @@ ggsave(paste0("../../figs/snv/allele_frequency_sdv_nonsdv", plot_format),
 # SDVs enriched for singletons?
 df <- mutant %>% 
     filter(!is.na(AF_bin_gnomad)) %>% 
-    mutate(singleton = ifelse(AF_bin_gnomad == 'Singleton', T, F)) %>% 
+    mutate(singleton = ifelse(AF_bin_gnomad == '< 0.001%', T, F)) %>% 
     group_by(sdv, singleton) %>% 
     tally() %>% 
     ungroup() %>% 
@@ -138,7 +138,14 @@ mat <- matrix(df$n, nrow = 2, dimnames = list(c('singleton', 'not singleton'),
 fisher.test(mat)
 # odds ratio 1.3, more SDV singletons than expected by chance
 
+# proportion of SDV vs. nonSDV different across AF?
+df <- mutant %>% 
+    filter(!is.na(AF_bin_gnomad)) %>% 
+    group_by(AF_bin_gnomad, sdv) %>% 
+    tally()
 
+mat <- matrix(df$n, nrow = 2)
+chisq.test(mat)
 # # PTV rate
 # data <- data %>% 
 #     mutate(sdv = ifelse(v2_dpsi <= -0.50, 'SDV', 'non-SDV'),
