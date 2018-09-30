@@ -87,8 +87,8 @@ counts %>%
     filter(type == 'PTV' | type == 'SDV') %>% 
     ggplot(aes(tolerance, pct*100)) + 
     geom_bar(stat = 'identity', position = 'dodge', aes(fill = type)) + 
-    scale_fill_manual(values = c('darkblue', 'darkred')) + 
-    labs(x = 'pLI', y = 'percentage', fill = 'variant type') + ylim(0,5) +
+    scale_fill_manual(values = c('darkred', 'darkblue')) + 
+    labs(x = 'pLI', y = 'percentage', fill = '') + ylim(0,5) +
     geom_hline(yintercept = 1050/27733*100, linetype = "dashed", color = "black") +
     geom_hline(yintercept = 340/27733*100, linetype = "dashed", color = "grey40") +
     scale_y_continuous(expand = c(0, 0)) + 
@@ -102,7 +102,11 @@ counts %>%
           axis.title.x = element_text(size = 20, color = "black", vjust = -0.5),
           axis.ticks.x = element_blank(),
           axis.text.y = element_text(size = 12, color = "grey20"),
-          axis.text.x = element_text(size = 13, color = "black")) 
+          axis.text.x = element_text(size = 13, color = "black"), 
+          legend.position = 'none') 
 
 ggsave(paste0(fig_folder, "pLI_sdv_vs_ptv", plot_format), 
-       width = 3.5, height = 3.5, units = 'in', dpi = hi_res)
+       width = 2.75, height = 4, units = 'in', dpi = hi_res)
+
+fisher.test(matrix(filter(counts, grepl('PTV', type))$n, nrow=2),
+            alternative = 'two.sided')

@@ -22,3 +22,6 @@ be made public upon publication.
 and produces the file `processed_data/snv/snv_data_clean.txt`. **This is probably
 the file you will want to work with**, it contains the calculated exon inclusion index
 as well as information integrated from the reference (`ref/snv/snv_ref_formatted_converted_original_seq.txt`)
+- `processed_data/snv/snv_simple_list.txt` contains a simplified list of the SDVs 
+identified in the ExAC library and contains coordinates, the reference and alternate alleles,
+and the delta exon inclusion index.

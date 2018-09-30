@@ -99,10 +99,14 @@ phylop_tile <- data %>%
     ) +
     labs(y = '', x = '', fill = '') +
     viridis::scale_fill_viridis()
-phylop_tile
+
 ggsave(filename = paste0(fig_folder, "snv_phylop_tile", plot_format), 
        plot = phylop_tile,
        width = 11, height = 1, units = 'in')
+
+# phylop_legend <- get_legend(phylop_tile)
+# ggsave(paste0(fig_folder, 'phylop_legend', plot_format),
+#        phylop_legend, width = 1, height = 3, units = 'in')
 
 ###############################################################################
 ### SNV density tile ###
@@ -121,7 +125,7 @@ snp_density_tile <- ref %>%
     summarise(snp_density = n() / total_snps) %>%
     ggplot(aes(rel_pos_binned, 0.5)) + geom_tile(aes(fill = snp_density)) +
     theme(axis.text = element_blank(), axis.ticks = element_blank(), 
-          legend.position = 'none',
+          # legend.position = 'none',
           axis.line = element_blank(),
           axis.title.y = element_blank(),
           axis.title.x = element_blank(),

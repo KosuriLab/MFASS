@@ -30,7 +30,7 @@ phylopSummary <- data %>%
     dplyr::summarize(phylop_median = median(phylop_score),
                      phylop_se = sqrt(var(phylop_score)/length(phylop_score)))
 
-data %>%
+gg1 <- data %>%
     ggplot() +
     geom_violin(aes(strong_lof, phylop_score, fill = strong_lof, color = strong_lof)) +
     geom_boxplot(aes(strong_lof, phylop_score), width = 0.05, outlier.shape=NA) +
@@ -50,7 +50,7 @@ data %>%
     scale_x_discrete(labels = c('non-\nSDV', 'SDV')) +
     ylab('phyloP score')
 
-ggsave(filename = paste0(fig_folder, "snv_phylop_violin", plot_format),
+ggsave(filename = paste0(fig_folder, "snv_phylop_violin", plot_format), gg1,
        width = 2, height = 3, units = 'in') 
 
 # could missense variants be driving the difference in phyloP scores?
@@ -59,6 +59,32 @@ wilcox.test(phylop_score ~ strong_lof, with_missense)
 without_missense <- data %>% filter(!is.na(strong_lof), consequence != 'missense_variant')
 wilcox.test(phylop_score ~ strong_lof, without_missense)
 
+# effect sizes
+t.test(phylop_score ~ strong_lof, with_missense)
+t.test(phylop_score ~ strong_lof, without_missense)
+
+gg2 <- without_missense %>%
+    ggplot() +
+    geom_violin(aes(strong_lof, phylop_score, fill = strong_lof, color = strong_lof)) +
+    geom_boxplot(aes(strong_lof, phylop_score), width = 0.05, outlier.shape=NA) +
+    theme_bw() + 
+    theme(legend.position = 'none',
+          strip.text = element_text(size = 18.5),
+          strip.background = element_rect(fill = "#E0E0E0", color = "white"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.spacing = unit(1, "lines"),
+          panel.border = element_rect(fill = NA, color = "grey50"),
+          axis.title.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.title.y = element_text(size = 14),
+          axis.text.x = element_text(size = 12),
+          plot.margin = unit(c(0,0,0,0),'in')) +
+    scale_x_discrete(labels = c('non-\nSDV', 'SDV')) +
+    ylab('phyloP score')
+
+ggsave(filename = paste0(fig_folder, "snv_phylop_violin_no_missense", plot_format), gg2,
+       width = 2, height = 3, units = 'in') 
 
 ############################################################
 # Fig. 3DE, phyloP: proportion of SDVs across gene regions

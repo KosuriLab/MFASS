@@ -159,6 +159,25 @@ data <- data %>%
 
 write.table(data, '../../processed_data/sre/sre_data_clean.txt', sep ='\t', row.names = F, quote = T)
 
+# write simple file of processed data for geo
+data %>% 
+    select(internal_id = id, 
+           ensembl_exon_id_new = new_exon_id,
+           chr, 
+           construct_start_hg19 = start,
+           construct_end_hg19 = end,
+           strand,
+           intron1_len,
+           exon_len,
+           intron2_len,
+           seq,
+           category = seq_type,
+           index_R1_smn1, index_R2_smn1, index_R1_dhfr, index_R2_dhfr,
+           nat_index_R1_smn1, nat_index_R2_smn1, nat_index_R1_dhfr, nat_index_R2_dhfr,
+           delta_index_smn1 = dpsi_smn1, delta_index_dhfr = dpsi_dhfr) %>% 
+    write.table('../../GEO/sre_exon_inclusion_index_smn1_dhfr.txt',
+                quote = F, row.names = F, sep = '\t')
+
 data %>% 
     ggplot(aes(index_R1_smn1, index_R2_smn1)) + 
     geom_point(alpha = 0.10) +

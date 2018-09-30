@@ -163,15 +163,15 @@ data_all$v1_index <- rowMeans(select(data_all, v1_index_R1, v1_index_R2))
 data_all$v2_index <- rowMeans(select(data_all, v2_index_R1, v2_index_R2))
 
 # tetrachoric correlation, 0.99
-data_all <- data_all %>%
+tmp <- data_all %>%
     filter(!is.na(v1_index), !is.na(v2_index)) %>%
     mutate(v1_index_binary = ifelse(v1_index >= 0.5, 1, 0),
            v2_index_binary = ifelse(v2_index >= 0.5, 1, 0))
 
-weightedCorr(data_all$v1_index_binary, 
-             data_all$v2_index_binary, 
+weightedCorr(tmp$v1_index_binary, 
+             tmp$v2_index_binary, 
              method = "polychoric", 
-             weights = data_all$all_norm)
+             weights = tmp$all_norm)
 
 # correlation between v1 and v2
 corr <- wtd.cor(data_all$v1_index, data_all$v2_index, data_all$all_norm)
@@ -191,10 +191,6 @@ gg <- ggplot(data_all, aes(v1_index, v2_index)) + geom_point(alpha = 0.10) +
           axis.line.y = element_line(color = 'grey50'),
           plot.margin = unit(c(2,2,3,3),"mm"))+
     theme(legend.position = 'none')
-    # annotate('text', x = 0.95, y = 0.10, parse = T,
-    #          label = paste0('italic(r)==', signif(corr[1], 2)), size = 5) +
-    # annotate('text', x = 0.96, y = 0.05, parse = T,
-    #          label = paste('italic(p) < 10^-16'), size = 5)
 
 ggsave(paste0('../../figs/supplement/SF6B_snv_v1_v2_replicates', plot_format), 
        gg, width = 6, height = 6)

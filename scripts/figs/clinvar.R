@@ -11,10 +11,10 @@ load_pkgs(pkgs)
 
 options(stringsAsFactors = F, warn = -1, warnings = -1)
 
-plot_format <- '.tiff'
+plot_format <- '.png'
 hi_res <- 600
 
-data <- read.table('../../../processed_data/snv/snv_func_annot.txt',
+data <- read.table('../../processed_data/snv/snv_func_annot.txt',
                    sep = '\t', header = T)
 data <- data %>% 
     filter(category == 'mutant', (!is.na(v2_dpsi)), nat_v2_index >= 0.5)
@@ -23,7 +23,7 @@ data <- data %>%
 # Clinvar
 sdvs <- filter(data, strong_lof == T)
 # hg19 coordinates
-clinvar <- read.table('../../../ref/clinvar_variant_summary.txt',
+clinvar <- read.table('../../ref/clinvar_variant_summary.txt',
                       header = F, sep = '\t', fill = T)
 names <- c('AlleleID', 'Type', 'Name', 'GeneID', 'GeneSymbol',	'HGNC_ID',
            'ClinicalSignificance',	'ClinSigSimple', 'LastEvaluated', 
@@ -79,9 +79,10 @@ df3 <-  clinvar_snvs %>%
 bind_rows(df1, df2, df3) %>% 
     ggplot(aes(ClinicalSignificance, pct * 100)) + 
     geom_bar(stat = 'identity', position = 'dodge', aes(fill = sdv)) + 
-    scale_fill_manual(values = c('grey40', 'black', 'darkred')) +
+    scale_fill_manual(values = c('grey40', 'black', 'darkblue')) +
     labs(y = 'percentage', x = 'Clinvar significance') +
     # theme(axis.text.x = element_text(angle = 45)) + 
     coord_flip()
 
-ggsave('../../../figs/clinvar_sdvs.png')
+ggsave('../../figs/clinvar_sdvs.png',
+       width = 8, height = 4, units = 'in')
