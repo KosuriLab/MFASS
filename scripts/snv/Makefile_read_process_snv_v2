@@ -1,0 +1,76 @@
+# @author Kimberly Insigne
+# kiminsigne@gmail.com
+#
+# This Makefile merges paired read files, aligns each merged file to reference,
+# and aggregates the alignments.
+# 
+# This script processes the 09/2016 ExAC data.
+
+# paths
+SHELL := /bin/bash
+RAW_DATA := ../../raw_data/snv_v2
+DATA := ../../processed_data/snv
+
+# programs
+BBMERGE := bbmerge.sh
+
+# string processing to making dependencies easier
+READS := $(wildcard $(RAW_DATA)/*.fastq*)
+NO_GZ := $(READS:.gz=)
+# $(NO_GZ:.fastq=)) removes the fastq extension
+# notdir removes the directory names from the file names
+# $(firstword $(subst _, ,) ) replaces the _ with whitespace and grabs the first
+# field, which is the prefix name we want
+# sort removes duplicates
+BASE := $(sort $(foreach file,$(notdir $(NO_GZ:.fastq=)),$(firstword $(subst _, ,$(file)))))
+
+# -----------------------------------------------------------------------------
+# Recipes
+
+# concat recipe must be run first, separately, to combine all the necessary files
+all: align 
+
+align : $(DATA)/snv_v2_all_alignments.csv
+
+# clean :
+# 	@ rm -f produced_data/*
+
+.PHONY : clean
+
+# keep all intermediate files
+.SECONDARY : 
+
+
+# -----------------------------------------------------------------------------
+# Primary processing pipeline
+
+$(DATA)/reads/v2/%_merged.fastq: $(RAW_DATA)/%_R1.fastq.gz $(RAW_DATA)/%_R2.fastq.gz
+	@# Actions: 
+	@#	Merge compressed paired read FASTQ files with bbmerge
+	@# Dependencies:
+	@#	compressed fastq files in data directory
+	@ $(BBMERGE) in1=$(word 1, $^) in2=$(word 2, $^) out=$@ \
+		outu1=$(DATA)/reads/v2/$(subst .fastq.gz,_unmerged.fastq,$(notdir $(word 1, $^))) \
+		outu2=$(DATA)/reads/v2/$(subst .fastq.gz,_unmerged.fastq,$(notdir $(word 2, $^)))
+
+
+$(DATA)/reads/v2/%_perfect_alignment.txt: $(DATA)/reads/v2/%_merged.fastq ../perfect_alignment.py
+	@# Actions:
+	@#	Align sequences to reference FASTA file
+	@# Dependencies:
+	@#	merged FASTQ files from previous step.
+	@ echo "Aligning" $(subst _perfect_alignment.txt,, $(notdir $@))
+	@ python ../perfect_alignment.py -i $< -r ../../ref/snv/snv_ref_all.fasta -o $@
+
+
+$(DATA)/snv_v2_all_alignments.csv: $(patsubst %,$(DATA)/reads/v2/%_perfect_alignment.txt,$(BASE)) ../aggregate_alignments.py
+	@# Actions:
+	@#	Aggregate all perfect alignments into one file
+	@# Dependencies:
+	@#	perfect alignment files in produced_data/ from the previous step
+	@ echo "Aggregating alignments..."
+	@ ls $(DATA)/reads/v2/*perfect_alignment.txt > $(DATA)/reads/v2/alignment_list.txt
+	@ python ../aggregate_alignments.py $(DATA)/reads/v2/alignment_list.txt $@
+	@ rm $(DATA)/reads/v2/alignment_list.txt
+
+print-%: ; @echo $* = $($*)
