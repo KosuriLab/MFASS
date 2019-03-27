@@ -1,6 +1,3 @@
-# TODO: add commands to process sequencing data. This will run everything for
-# sre, from processing sequencing, formatting reference, and making figures
-
 all: format_ref rescore_ref clean_data
 
 format_ref: ../../ref/sre/sre_ref_formatted_converted.txt
@@ -23,7 +20,7 @@ Rscript = /Library/Frameworks/R.framework/Resources/Rscript
 	python ../score_lib.py $< seq ./data/motifs/Ke2011/ \
 	../../ref/Rosenberg_2015/exonic_mer6_scores.series 2 $@
 
-
+# process sequencing data
 ../../processed_data/sre/sre_data_clean.txt: ../../ref/sre/sre_ref_formatted_converted.txt sre_format_ref.R
 	@ echo "Cleaning up data..."
 	@ $(Rscript) sre_data_clean.R
